@@ -13,7 +13,7 @@ module Boxr
     uri
   end
 
-  def self.get_tokens(code=nil, grant_type: "authorization_code", assertion: nil, scope: nil, username: nil, expires_in: nil, client_id: ENV['BOX_CLIENT_ID'], client_secret: ENV['BOX_CLIENT_SECRET'])
+  def self.get_tokens(code=nil, grant_type: "authorization_code", assertion: nil, scope: nil, username: nil, expires_in: ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'], client_id: ENV['BOX_CLIENT_ID'], client_secret: ENV['BOX_CLIENT_SECRET'])
     uri = "https://api.box.com/oauth2/token"
     body = "grant_type=#{grant_type}&client_id=#{client_id}&client_secret=#{client_secret}"
     body = body + "&code=#{code}" unless code.nil?
@@ -34,7 +34,7 @@ module Boxr
   end
 
   def self.get_user_token(user_id, private_key: ENV['JWT_PRIVATE_KEY'], private_key_password: ENV['JWT_PRIVATE_KEY_PASSWORD'],
-                          public_key_id: ENV['JWT_PUBLIC_KEY_ID'], expires_in: nil, client_id: ENV['BOX_CLIENT_ID'], client_secret: ENV['BOX_CLIENT_SECRET'])
+                          public_key_id: ENV['JWT_PUBLIC_KEY_ID'], expires_in: ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'], client_id: ENV['BOX_CLIENT_ID'], client_secret: ENV['BOX_CLIENT_SECRET'])
     unlocked_private_key = unlock_key(private_key, private_key_password)
     assertion = jwt_assertion(unlocked_private_key, client_id, user_id, "user", public_key_id)
     get_token(grant_type: JWT_GRANT_TYPE, assertion: assertion, client_id: client_id, client_secret: client_secret, expires_in: expires_in)
@@ -99,5 +99,8 @@ module Boxr
       OpenSSL::PKey::RSA.new(private_key, private_key_password)
     end
   end
+  
+  # def self.
+  #   ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'].nil? ? nil : ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'] * 1000 + Time.now.utc.to_i
 
 end
