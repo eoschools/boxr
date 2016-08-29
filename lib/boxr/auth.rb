@@ -20,7 +20,7 @@ module Boxr
     body = body + "&scope=#{scope}" unless scope.nil?
     body = body + "&username=#{username}" unless username.nil?
     body = body + "&assertion=#{assertion}" unless assertion.nil?
-    body = body + "&box_access_token_expires_at=#{Time.now.to_i + expires_in}" unless expires_in.nil?
+    body = body + "&box_access_token_expires_at=#{Time.now.to_i + expires_in.to_i}" unless expires_in.nil?
 
     auth_post(uri, body)
   end
