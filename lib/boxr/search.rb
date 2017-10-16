@@ -1,20 +1,20 @@
 module Boxr
   class Client
 
-    def search( query=nil, scope: nil, file_extensions: [], 
+    def search( query=nil, scope: nil, file_extensions: [],
                 created_at_range_from_date: nil, created_at_range_to_date: nil,
                 updated_at_range_from_date: nil, updated_at_range_to_date: nil,
-                size_range_lower_bound_bytes: nil, size_range_upper_bound_bytes: nil, 
-                owner_user_ids: [], ancestor_folder_ids: [], content_types: [], trash_content: nil, 
+                size_range_lower_bound_bytes: nil, size_range_upper_bound_bytes: nil,
+                owner_user_ids: [], ancestor_folder_ids: [], content_types: [], trash_content: nil,
                 mdfilters: nil, type: nil, limit: 30, offset: 0)
 
-      
+
       unless mdfilters.nil?
         unless mdfilters.is_a? String   #if a string is passed in assume it is already formatted correctly
-          unless mdfilters.is_a? Array  
+          unless mdfilters.is_a? Array
             mdfilters = [mdfilters]     #if just one mdfilter is specified ensure that it is packaged inside an array
           end
-          mdfilters = Oj.dump(mdfilters) 
+          mdfilters = JSON.dump(mdfilters)
         end
       end
 

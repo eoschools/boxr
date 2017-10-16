@@ -111,6 +111,16 @@ updated_file = client.create_shared_link_for_file(file, access: :open)
 puts "Shared Link: #{updated_file.shared_link.url}"
 ```
 
+### NOTE: Using HTTP mocking libraries for testing
+When using HTTP mocking libraries for testing, you may need to set Boxr::BOX_CLIENT to a fresh instance of HTTPClient in your test setup after loading the HTTP mocking library. For example, when using WebMock with RSpec you might could add the following to your RSpec configuration:
+``` ruby
+RSpec.configure do |config|
+  config.before(:suite) do
+    Boxr::BOX_CLIENT = HTTPClient.new
+  end
+end
+```
+
 ### Methods
 #### [OAuth & JWT](https://box-content.readme.io/reference#oauth-2)
 ```ruby
@@ -153,7 +163,7 @@ delete_folder(folder, recursive: false, if_match: nil)
 
 copy_folder(folder, dest_folder, name: nil)
 
-create_shared_link_for_folder(folder, access: nil, unshared_at: nil, can_download: nil, can_preview: nil)
+create_shared_link_for_folder(folder, access: nil, unshared_at: nil, can_download: nil, can_preview: nil, password: nil)
 
 disable_shared_link_for_folder(folder)
 
@@ -172,7 +182,7 @@ file_from_path(path)
 file_from_id(file_id, fields: [])
 alias :file :file_from_id
 
-embed_url(file)
+def embed_url(file, show_download: false, show_annotations: false)
 alias :embed_link :embed_url
 alias :preview_url :embed_url
 alias :preview_link :embed_url
@@ -207,7 +217,7 @@ copy_file(file, parent, name: nil)
 
 thumbnail(file, min_height: nil, min_width: nil, max_height: nil, max_width: nil)
 
-create_shared_link_for_file(file, access: nil, unshared_at: nil, can_download: nil, can_preview: nil)
+create_shared_link_for_file(file, access: nil, unshared_at: nil, can_download: nil, can_preview: nil, password: nil)
 
 disable_shared_link_for_file(file)
 
@@ -379,6 +389,20 @@ enterprise_metadata
 metadata_schema(scope, template_key)
 ```
 
+#### [Watermarking](https://box-content.readme.io/reference#watermarking)
+```ruby
+get_watermark_on_file(file)
+
+apply_watermark_on_file(file)
+
+remove_watermark_on_file(file)
+
+get_watermark_on_folder(folder)
+
+apply_watermark_on_folder(folder)
+
+remove_watermark_on_folder(folder)
+```
 ## Contributing
 
 1. Fork it ( https://github.com/cburnette/boxr/fork )

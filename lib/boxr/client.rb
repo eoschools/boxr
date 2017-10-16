@@ -123,7 +123,7 @@ module Boxr
         end
 
         if (res.status==200)
-          body_json = Oj.load(res.body)
+          body_json = JSON.load(res.body)
           total_count = body_json["total_count"]
           offset = offset + limit
 
@@ -138,7 +138,7 @@ module Boxr
 
     def post(uri, body, query: nil, success_codes: [201], process_body: true, content_md5: nil, content_type: nil, if_match: nil)
       uri = Addressable::URI.encode(uri)
-      body = Oj.dump(body) if process_body
+      body = JSON.dump(body) if process_body
 
       res = with_auto_token_refresh do
         headers = standard_headers
@@ -154,7 +154,7 @@ module Boxr
       processed_response(res)
     end
 
-    def put(uri, body, query: nil, success_codes: [200], content_type: nil, if_match: nil)
+    def put(uri, body, query: nil, success_codes: [200, 201], content_type: nil, if_match: nil)
       uri = Addressable::URI.encode(uri)
 
       res = with_auto_token_refresh do
@@ -162,7 +162,7 @@ module Boxr
         headers['If-Match'] = if_match unless if_match.nil?
         headers["Content-Type"] = content_type unless content_type.nil?
 
-        BOX_CLIENT.put(uri, body: Oj.dump(body), query: query, header: headers)
+        BOX_CLIENT.put(uri, body: JSON.dump(body), query: query, header: headers)
       end
 
       check_response_status(res, success_codes)
@@ -190,7 +190,7 @@ module Boxr
 
       res = with_auto_token_refresh do
         headers = standard_headers
-        BOX_CLIENT.options(uri, body: Oj.dump(body), header: headers)
+        BOX_CLIENT.options(uri, body: JSON.dump(body), header: headers)
       end
 
       check_response_status(res, success_codes)
@@ -207,7 +207,7 @@ module Boxr
     end
 
     def with_auto_token_refresh
-      return yield unless @refresh_token or @jwt_secret_key
+      return yield unless @refresh_token or @jwt_private_key
 
       res = yield
       if res.status == 401
@@ -240,7 +240,7 @@ module Boxr
     end
 
     def processed_response(res)
-      body_json = Oj.load(res.body)
+      body_json = JSON.load(res.body)
       return BoxrMash.new(body_json), res
     end
 
@@ -271,9 +271,15 @@ module Boxr
     end
 
     def ensure_id(item)
-      return item if item.class == String || item.class == Integer || item.nil?
+      # Ruby 2.4 unified Fixnum and Bignum into Integer.  This tests for Ruby 2.4
+      if 1.class == Integer
+        return item if item.class == String || item.class == Integer || item.nil?
+      else
+        return item if item.class == String || item.class == Fixnum || item.class == Bignum || item.nil?
+      end
+
       return item.id if item.respond_to?(:id)
-      raise BoxrError.new(boxr_message: "Expecting an id of class String or Integer, or object that responds to :id")
+      raise BoxrError.new(boxr_message: "Expecting an id of class String or Fixnum, or object that responds to :id")
     end
 
     def restore_trashed_item(uri, name, parent)
@@ -287,9 +293,10 @@ module Boxr
       restored_item
     end
 
-    def create_shared_link(uri, item_id, access, unshared_at, can_download, can_preview)
+    def create_shared_link(uri, item_id, access, unshared_at, can_download, can_preview, password)
       attributes = {shared_link: {access: access}}
       attributes[:shared_link][:unshared_at] = unshared_at.to_datetime.rfc3339 unless unshared_at.nil?
+      attributes[:shared_link][:password] = password unless password.nil?
       attributes[:shared_link][:permissions] = {} unless can_download.nil? && can_preview.nil?
       attributes[:shared_link][:permissions][:can_download] = can_download unless can_download.nil?
       attributes[:shared_link][:permissions][:can_preview] = can_preview unless can_preview.nil?
