@@ -8,7 +8,7 @@ module Boxr
     query = {"response_type" => "#{response_type}", "state" => "#{state}", "client_id" => "#{client_id}"}
     query["scope"] = "#{scope}" unless scope.nil?
     query["folder_id"] = "#{folder_id}" unless folder_id.nil?
-    
+
     uri = template.expand({"host" => "#{host}", "query" => query})
     uri
   end
@@ -26,7 +26,7 @@ module Boxr
   end
 
   def self.get_enterprise_token(private_key: ENV['JWT_PRIVATE_KEY'], private_key_password: ENV['JWT_PRIVATE_KEY_PASSWORD'],
-                                public_key_id: ENV['JWT_PUBLIC_KEY_ID'], enterprise_id: ENV['BOX_ENTERPRISE_ID'], 
+                                public_key_id: ENV['JWT_PUBLIC_KEY_ID'], enterprise_id: ENV['BOX_ENTERPRISE_ID'],
                                 client_id: ENV['BOX_CLIENT_ID'], client_secret: ENV['BOX_CLIENT_SECRET'])
     unlocked_private_key = unlock_key(private_key, private_key_password)
     assertion = jwt_assertion(unlocked_private_key, client_id, enterprise_id, "enterprise", public_key_id)
@@ -75,7 +75,7 @@ module Boxr
 
     additional_headers = {}
     additional_headers['kid'] = public_key_id unless public_key_id.nil?
-    
+
     JWT.encode(payload, private_key, "RS256", additional_headers)
   end
 
@@ -85,7 +85,7 @@ module Boxr
     res = BOX_CLIENT.post(uri, body: body)
 
     if(res.status==200)
-      body_json = Oj.load(res.body)
+      body_json = JSON.load(res.body)
       return BoxrMash.new(body_json)
     else
       raise BoxrError.new(status: res.status, body: res.body, header: res.header)
@@ -99,8 +99,5 @@ module Boxr
       OpenSSL::PKey::RSA.new(private_key, private_key_password)
     end
   end
-  
-  # def self.
-  #   ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'].nil? ? nil : ENV['BOX_ACCESS_TOKEN_EXPIRY_RATE'] * 1000 + Time.now.utc.to_i
 
 end

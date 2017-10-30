@@ -92,6 +92,10 @@ describe Boxr::Client do
     puts "create shared link for folder"
     updated_folder = BOX_CLIENT.create_shared_link_for_folder(@test_folder, access: :open)
     expect(updated_folder.shared_link.access).to eq("open")
+
+    puts "create password-protected shared link for folder"
+    updated_folder = BOX_CLIENT.create_shared_link_for_folder(@test_folder, password: 'password')
+    expect(updated_folder.shared_link.is_password_enabled).to eq(true)
     shared_link = updated_folder.shared_link.url
 
     puts "inspect shared link"
@@ -213,6 +217,10 @@ describe Boxr::Client do
     updated_file = BOX_CLIENT.create_shared_link_for_file(test_file, access: :open)
     expect(updated_file.shared_link.access).to eq("open")
 
+    puts "create password-protected shared link for file"
+    updated_file = BOX_CLIENT.create_shared_link_for_file(test_file, password: 'password')
+    expect(updated_file.shared_link.is_password_enabled).to eq(true)
+
     puts "disable shared link for file"
     updated_file = BOX_CLIENT.disable_shared_link_for_file(test_file)
     expect(updated_file.shared_link).to be_nil
@@ -262,6 +270,36 @@ describe Boxr::Client do
 
     puts "delete web link"
     result = BOX_CLIENT.delete_web_link(web_link)
+    expect(result).to eq({})
+  end
+
+  #rake spec SPEC_OPTS="-e \"invokes watermarking operations"\"
+  it 'invokes watermarking operations' do
+    test_file = BOX_CLIENT.upload_file("./spec/test_files/#{TEST_FILE_NAME}", @test_folder)
+    folder = BOX_CLIENT.folder(@test_folder)
+
+    puts "apply watermark on file"
+    watermark = BOX_CLIENT.apply_watermark_on_file(test_file)
+    expect(watermark.watermark).to_not be_nil
+
+    puts "get watermark on file"
+    watermark = BOX_CLIENT.get_watermark_on_file(test_file)
+    expect(watermark.watermark).to_not be_nil
+
+    puts "remove watermark on file"
+    result = BOX_CLIENT.remove_watermark_on_file(test_file)
+    expect(result).to eq({})
+
+    puts "apply watermark on folder"
+    watermark = BOX_CLIENT.apply_watermark_on_folder(folder)
+    expect(watermark.watermark).to_not be_nil
+
+    puts "get watermark on folder"
+    watermark = BOX_CLIENT.get_watermark_on_folder(folder)
+    expect(watermark.watermark).to_not be_nil
+
+    puts "remove watermark on folder"
+    result = BOX_CLIENT.remove_watermark_on_folder(folder)
     expect(result).to eq({})
   end
 

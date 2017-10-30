@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Boxr::VERSION
   spec.authors       = ["Chad Burnette"]
   spec.email         = ["chadburnette@me.com"]
-  spec.summary       = "A Ruby client library for the Box V2 Content API that covers 100% of the underlying REST API."
+  spec.summary       = "A Ruby client library for the Box V2 Content API."
   spec.description   = ""
   spec.homepage      = "https://github.com/cburnette/boxr"
   spec.license       = "MIT"
@@ -28,9 +28,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "awesome_print"
   spec.add_development_dependency "lru_redux", "~> 0.8"
 
-  spec.add_runtime_dependency "oj", "~> 2.11"
-  spec.add_runtime_dependency "httpclient", "~> 2.5"
-  spec.add_runtime_dependency "hashie", "~> 3.3"
+  spec.add_runtime_dependency "httpclient", "~> 2.8"
+  spec.add_runtime_dependency "hashie", "~> 3.5"
   spec.add_runtime_dependency "addressable", "~> 2.3"
   spec.add_runtime_dependency "jwt", "~> 1.4"
 end

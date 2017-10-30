@@ -26,9 +26,9 @@ module Boxr
     end
     alias :file :file_from_id
 
-    def embed_url(file)
+    def embed_url(file, show_download: false, show_annotations: false)
       file_info = file_from_id(file, fields:[:expiring_embed_link])
-      url = file_info.expiring_embed_link.url
+      url = file_info.expiring_embed_link.url + "?showDownload=#{show_download}&showAnnotations=#{show_annotations}"
       url
     end
     alias :embed_link :embed_url
@@ -79,7 +79,7 @@ module Boxr
         uri = "#{FILES_URI}/#{file_id}/content"
         query = {}
         query[:version] = version unless version.nil?
-        body_json, response = get(uri, query: query, success_codes: [302,202], follow_redirect: false) #we don't want httpclient to automatically follow the redirect; we need to grab it
+        body_json, response = get(uri, query: query, success_codes: [302,202], process_response: false, follow_redirect: false) #we don't want httpclient to automatically follow the redirect; we need to grab it
 
         if(response.status==302)
           location = response.header['Location'][0]
@@ -120,7 +120,7 @@ module Boxr
         attributes[:content_created_at] = content_created_at.to_datetime.rfc3339 unless content_created_at.nil?
         attributes[:content_modified_at] = content_modified_at.to_datetime.rfc3339 unless content_modified_at.nil?
 
-        body = {attributes: Oj.dump(attributes), file: file}
+        body = {attributes: JSON.dump(attributes), file: file}
 
         file_info, response = post(FILES_UPLOAD_URI, body, process_body: false, content_md5: content_md5)
       end
@@ -211,10 +211,10 @@ module Boxr
       thumbnail
     end
 
-    def create_shared_link_for_file(file, access: nil, unshared_at: nil, can_download: nil, can_preview: nil)
+    def create_shared_link_for_file(file, access: nil, unshared_at: nil, can_download: nil, can_preview: nil, password: nil)
       file_id = ensure_id(file)
       uri = "#{FILES_URI}/#{file_id}"
-      create_shared_link(uri, file_id, access, unshared_at, can_download, can_preview)
+      create_shared_link(uri, file_id, access, unshared_at, can_download, can_preview, password)
     end
 
     def disable_shared_link_for_file(file)

@@ -1,4 +1,4 @@
-require 'oj'
+require 'json'
 require 'httpclient'
 require 'hashie'
 require 'addressable/template'
@@ -22,6 +22,7 @@ require 'boxr/metadata'
 require 'boxr/events'
 require 'boxr/auth'
 require 'boxr/web_links'
+require 'boxr/watermarking'
 
 module Enumerable
   def files
@@ -38,6 +39,9 @@ module Enumerable
 end
 
 class BoxrMash < Hashie::Mash
+
+  self.disable_warnings
+
   def entries
     self["entries"]
   end
@@ -48,8 +52,6 @@ class BoxrMash < Hashie::Mash
 end
 
 module Boxr
-  Oj.default_options = {:mode => :compat }
-
   #The root folder in Box is always identified by 0
   ROOT = 0
 
